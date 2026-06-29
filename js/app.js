@@ -386,7 +386,7 @@ function renderTab() {
   if (currentTab === 'task') {
     md = split === -1 ? '*No specific task defined — explore freely!*' : ch.description.slice(split).trim();
   } else {
-    md = split === -1 ? ch.description : ch.description.slice(0, split).trim();
+    md = ch.description; // Lesson shows everything
   }
   const html = linkifyDictTerms(marked.parse(md));
   document.getElementById('lesson-content').innerHTML = html;

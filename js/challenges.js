@@ -11,14 +11,50 @@ const CHALLENGES = {
       topic: 'Basics',
       description: `## Variables & Types
 
-In Python, you don't declare a type — it's inferred automatically.
+Python uses **dynamic typing** — you don't declare a type, Python infers it from the value you assign.
 
 \`\`\`python
-name = "Alice"   # str
-age = 30         # int
-score = 9.5      # float
-active = True    # bool
+name    = "Alice"  # str   — text in quotes
+age     = 30       # int   — whole number, no decimal
+score   = 9.5      # float — has a decimal point
+active  = True     # bool  — exactly True or False (capital!)
+nothing = None     # None  — Python's intentional "no value"
 \`\`\`
+
+Think of a variable as a **labeled sticky note** on a value. You can move the note to a different value anytime — Python doesn't lock you in.
+
+### The five types you'll use constantly
+
+| Type | Example | Notes |
+|------|---------|-------|
+| \`str\` | \`"hello"\` | Any text — single or double quotes both work |
+| \`int\` | \`42\` | Whole numbers, no decimal point |
+| \`float\` | \`3.14\` | Numbers with a decimal point |
+| \`bool\` | \`True\` / \`False\` | Always capitalized — trips everyone up |
+| \`None\` | \`None\` | Python's way of saying "nothing here" |
+
+### Checking a type
+
+\`\`\`python
+type("hello")         # <class 'str'>
+type(42)              # <class 'int'>
+isinstance(42, int)   # True — preferred in real code
+\`\`\`
+
+### ✨ f-strings — the cleanest way to embed variables in text
+
+\`\`\`python
+city = "Tokyo"
+pop  = 14_000_000   # underscores improve readability in big numbers
+print(f"{city} has about {pop:,} people")
+# → Tokyo has about 14,000,000 people
+\`\`\`
+
+✨ Use underscores in big numbers for readability: \`1_000_000\` is a perfectly valid \`int\`.
+
+⚠️ \`True\` and \`False\` must be capitalized. Lowercase \`true\` gives you a \`NameError\` — Python is not JavaScript.
+
+⚠️ \`"age: " + 30\` → \`TypeError\`. You can't concatenate a string and an int. Use \`str(30)\` or just use an f-string.
 
 **Your task:** Create the following variables and print each one:
 - \`city\` — a string with any city name
@@ -59,13 +95,48 @@ except NameError as e:
       topic: 'Strings',
       description: `## String Formatting
 
-f-strings are Python's cleanest way to embed variables in text. Prefix the string with \`f\` and use curly braces:
+Python has three ways to build strings with variables. The modern winner is **f-strings**.
+
+### The three approaches
 
 \`\`\`python
 name = "Sam"
-age = 25
-print(f"My name is {name} and I am {age} years old.")
+age  = 25
+
+# Old — string concatenation (requires str() for non-strings)
+print("My name is " + name + " and I am " + str(age))
+
+# Better — .format()
+print("My name is {} and I am {}".format(name, age))
+
+# Modern Python — f-strings (prefix with f, any expression inside { })
+print(f"My name is {name} and I am {age}")
 \`\`\`
+
+### What can go inside \`{ }\`?
+
+Literally any Python expression:
+
+\`\`\`python
+price = 9.99
+print(f"Price: \${price:.2f}")          # → Price: $9.99  (2 decimal places)
+print(f"3 + 4 = {3 + 4}")              # → 3 + 4 = 7
+print(f"Uppercase: {name.upper()}")    # → Uppercase: SAM
+\`\`\`
+
+### Common format specifiers
+
+| Spec | What it does | Example |
+|------|-------------|---------|
+| \`:.2f\` | 2 decimal places | \`f"{3.14159:.2f}"\` → \`"3.14"\` |
+| \`:,\` | comma thousands separator | \`f"{1000000:,}"\` → \`"1,000,000"\` |
+| \`:>10\` | right-align in 10 chars | padding with spaces |
+| \`:^10\` | center in 10 chars | padding with spaces |
+| \`:05d\` | zero-pad integer to 5 digits | \`f"{42:05d}"\` → \`"00042"\` |
+
+✨ f-strings evaluate at runtime — any valid Python expression works inside \`{ }\`.
+
+⚠️ The \`f\` must come immediately before the opening quote: \`f"text"\`, not \`f + "text"\`.
 
 **Your task:** Given the variables below, use an f-string to print:
 
@@ -101,14 +172,54 @@ except AssertionError as e:
       topic: 'Data Structures',
       description: `## Lists
 
-Lists store ordered collections. You access items by index (starting at 0).
+A list is Python's go-to for **ordered, changeable collections**. Lists can hold anything — numbers, strings, other lists, mixed types — all in one container.
 
 \`\`\`python
 fruits = ["apple", "banana", "cherry"]
-print(fruits[0])   # apple
-print(fruits[-1])  # cherry (last item)
-fruits.append("mango")
 \`\`\`
+
+### Indexing — accessing individual items
+
+Python counts from **zero**. The first item is always index \`0\`.
+
+\`\`\`python
+fruits[0]   # "apple"   — first item
+fruits[1]   # "banana"  — second item
+fruits[-1]  # "cherry"  — last item (negatives count from the end)
+fruits[-2]  # "banana"  — second to last
+\`\`\`
+
+### Slicing — grabbing a range
+
+\`\`\`python
+fruits[0:2]   # ["apple", "banana"]  — indices 0 and 1 (stop is exclusive)
+fruits[1:]    # ["banana", "cherry"] — from index 1 to the end
+fruits[:2]    # ["apple", "banana"]  — from start to index 2 (exclusive)
+fruits[::-1]  # ["cherry", "banana", "apple"] — the whole list reversed
+\`\`\`
+
+### Essential list methods
+
+| Method | What it does |
+|--------|-------------|
+| \`list.append(x)\` | Add \`x\` to the end |
+| \`list.pop()\` | Remove and return the last item |
+| \`list.pop(i)\` | Remove and return item at index \`i\` |
+| \`list.insert(i, x)\` | Insert \`x\` before position \`i\` |
+| \`list.remove(x)\` | Remove the first occurrence of \`x\` |
+| \`list.sort()\` | Sort the list in-place |
+| \`sorted(list)\` | Return a new sorted list (original unchanged) |
+| \`len(list)\` | Number of items in the list |
+
+\`\`\`python
+fruits.append("mango")    # ["apple", "banana", "cherry", "mango"]
+fruits.pop()              # removes "mango", returns "mango"
+len(fruits)               # 3
+\`\`\`
+
+✨ Lists are **mutable** — you can change, add, and remove items after creation. This is different from tuples, which are locked.
+
+⚠️ Accessing an index that doesn't exist raises \`IndexError\`. A list with 3 items has valid indices: \`0\`, \`1\`, \`2\` (and \`-1\`, \`-2\`, \`-3\`).
 
 **Your task:**
 1. Create a list called \`languages\` containing at least 3 programming languages as strings
@@ -154,15 +265,59 @@ except AssertionError as e:
       topic: 'Data Structures',
       description: `## Dictionaries
 
-Dictionaries store key-value pairs. You look up a key to get its value.
+A dictionary stores **key → value** pairs. Think of it like a real dictionary: you look up a word (the key) to find its definition (the value). Keys are usually strings; values can be anything.
 
 \`\`\`python
-person = {"name": "Alice", "age": 30}
-print(person["name"])        # Alice
-person["job"] = "Engineer"   # add new key
-for key, value in person.items():
-    print(f"{key}: {value}")
+person = {
+    "name": "Alice",
+    "age":  30,
+    "job":  "Engineer",
+}
 \`\`\`
+
+### Accessing and modifying values
+
+\`\`\`python
+person["name"]           # "Alice"  — read a value by key
+person["age"] = 31       # update an existing key
+person["city"] = "Tokyo" # add a brand new key
+del person["job"]        # remove a key entirely
+\`\`\`
+
+### Safe access — avoid KeyError
+
+\`\`\`python
+person.get("name")          # "Alice"
+person.get("salary")        # None  (no crash if key doesn't exist!)
+person.get("salary", 0)     # 0     — your custom default
+\`\`\`
+
+### Iterating — the three patterns
+
+\`\`\`python
+# Keys only (default when you loop a dict directly)
+for key in person:
+    print(key)
+
+# Values only
+for val in person.values():
+    print(val)
+
+# Both at once — most useful
+for key, val in person.items():
+    print(f"{key}: {val}")
+\`\`\`
+
+### Checking if a key exists
+
+\`\`\`python
+"name" in person    # True  — checks keys only
+"Alice" in person   # False — "Alice" is a value, not a key
+\`\`\`
+
+✨ In Python 3.7+, dictionaries preserve **insertion order** — the order you added keys is the order you get them back.
+
+⚠️ Accessing a key that doesn't exist raises \`KeyError\`. When a key might be absent, always use \`.get()\`.
 
 **Your task:** Complete \`print_dict_elements\` so it prints each key and value as \`key: value\`, then call it with \`rocket_info\`.`,
       starterCode: `def print_dict_elements(dct):
@@ -204,15 +359,57 @@ except AssertionError:
       topic: 'Functions',
       description: `## Functions
 
-Functions package reusable logic. Parameters go in the parentheses, and \`return\` sends a value back.
+A function packages logic so you can **reuse it** without repeating yourself. Define it once with \`def\`, call it as many times as you need.
 
 \`\`\`python
 def greet(name):
     return f"Hello, {name}!"
 
-result = greet("Alice")
-print(result)  # Hello, Alice!
+greet("Alice")  # "Hello, Alice!"
+greet("Bob")    # "Hello, Bob!"
 \`\`\`
+
+### Anatomy of a function
+
+\`\`\`python
+def function_name(parameter1, parameter2):
+    # body — indented 4 spaces
+    result = parameter1 + parameter2
+    return result   # sends a value back to whoever called the function
+\`\`\`
+
+Without a \`return\` statement, the function returns \`None\` automatically.
+
+### Parameters vs Arguments
+
+| Term | What it means |
+|------|--------------|
+| **Parameter** | The variable name in the definition: \`def f(x)\` |
+| **Argument** | The actual value you pass when calling: \`f(42)\` |
+
+### Default parameters
+
+\`\`\`python
+def power(base, exp=2):      # exp defaults to 2 if not provided
+    return base ** exp
+
+power(3)     # 9  — 3 squared
+power(3, 3)  # 27 — 3 cubed
+\`\`\`
+
+### Keyword arguments — order doesn't matter
+
+\`\`\`python
+def bmi(weight_kg, height_m):
+    return round(weight_kg / height_m ** 2, 1)
+
+bmi(weight_kg=70, height_m=1.75)  # same result
+bmi(height_m=1.75, weight_kg=70)  # order doesn't matter with keywords
+\`\`\`
+
+✨ Keep functions focused — one function should do one thing well. If you're calling it \`do_everything\`, it's probably too big.
+
+⚠️ \`return\` exits the function immediately. Any code after a \`return\` in the same block is **dead code** that will never run.
 
 **Your task:** Write \`calculate_bmi(weight_kg, height_m)\` that returns \`weight_kg / (height_m ** 2)\` rounded to 1 decimal place.`,
       starterCode: `def calculate_bmi(weight_kg, height_m):
@@ -248,15 +445,75 @@ except TypeError as e:
       topic: 'Loops',
       description: `## For Loops
 
-Loops let you repeat code for each item in a sequence.
+A \`for\` loop repeats code once **for each item** in a sequence — a list, a string, a range of numbers, a dictionary, anything iterable.
 
 \`\`\`python
-numbers = [1, 2, 3, 4, 5]
+fruits = ["apple", "banana", "cherry"]
+for fruit in fruits:
+    print(fruit)
+# apple
+# banana
+# cherry
+\`\`\`
+
+### Looping over a range of numbers
+
+\`\`\`python
+for i in range(5):          # 0, 1, 2, 3, 4
+    print(i)
+
+for i in range(1, 6):       # 1, 2, 3, 4, 5  (start, stop — stop is exclusive)
+    print(i)
+
+for i in range(0, 10, 2):   # 0, 2, 4, 6, 8  (start, stop, step)
+    print(i)
+\`\`\`
+
+### The accumulator pattern
+
+Initialize outside, add inside — the most common loop pattern:
+
+\`\`\`python
+numbers = [1, 5, 3, 8, 2, 9]
+
+# Sum
 total = 0
 for n in numbers:
-    total += n
-print(total)  # 15
+    total += n        # same as: total = total + n
+print(total)          # 28
+
+# Count items matching a condition
+count = 0
+for n in numbers:
+    if n > 4:
+        count += 1
+print(count)          # 3  (5, 8, 9 are above 4)
 \`\`\`
+
+### Looping with index — \`enumerate()\`
+
+\`\`\`python
+for i, fruit in enumerate(fruits):
+    print(f"{i}: {fruit}")
+# 0: apple
+# 1: banana
+# 2: cherry
+\`\`\`
+
+### \`break\` and \`continue\`
+
+\`\`\`python
+for n in [1, 2, 3, 4, 5]:
+    if n == 3:
+        continue    # skip this iteration, go to next
+    if n == 5:
+        break       # exit the loop entirely
+    print(n)        # prints 1, 2, 4
+\`\`\`
+
+✨ Prefer \`enumerate()\` over \`range(len(list))\` — it's more readable and Pythonic.
+
+⚠️ Don't modify a list while iterating over it — the loop can skip items or crash. Iterate over a copy (\`list.copy()\`) or build a new list instead.
 
 **Your task:** Write \`count_above(numbers, threshold)\` that returns how many numbers in the list are **strictly greater than** the threshold.
 
@@ -298,19 +555,59 @@ except AssertionError as e:
       topic: 'Control Flow',
       description: `## Conditionals
 
-Use \`if\`, \`elif\`, and \`else\` to branch based on conditions. Order matters — Python checks from top to bottom and stops at the first match.
+Conditionals let your code **make decisions**. Use \`if\`, \`elif\`, and \`else\` to run different code depending on what's true.
 
 \`\`\`python
-def classify(score):
-    if score >= 90:
-        return "A"
-    elif score >= 80:
-        return "B"
-    elif score >= 70:
-        return "C"
-    else:
-        return "F"
+score = 85
+
+if score >= 90:
+    print("A")
+elif score >= 80:
+    print("B")   # ← this runs
+elif score >= 70:
+    print("C")
+else:
+    print("F")
 \`\`\`
+
+Python checks from **top to bottom** and stops at the first condition that's true — later branches are never even evaluated.
+
+### Comparison operators
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| \`==\` | Equal to | \`x == 5\` |
+| \`!=\` | Not equal to | \`x != 5\` |
+| \`>\` | Greater than | \`x > 5\` |
+| \`<\` | Less than | \`x < 5\` |
+| \`>=\` | Greater than or equal | \`x >= 5\` |
+| \`<=\` | Less than or equal | \`x <= 5\` |
+
+### Combining conditions with \`and\`, \`or\`, \`not\`
+
+\`\`\`python
+age = 20
+has_id = True
+
+if age >= 18 and has_id:       # both must be True
+    print("Welcome!")
+
+if age < 13 or age >= 65:      # either one True is enough
+    print("Discounted ticket")
+
+if not has_id:                 # flip True → False
+    print("No entry without ID")
+\`\`\`
+
+### One-liner: the ternary expression
+
+\`\`\`python
+label = "adult" if age >= 18 else "minor"
+\`\`\`
+
+✨ Order conditions from **most specific to least specific**. If \`age < 5\` should match before \`age < 12\`, it must come first.
+
+⚠️ \`=\` is assignment. \`==\` is comparison. \`if x = 5:\` is a \`SyntaxError\` — always use \`==\` inside \`if\`.
 
 **Your task:** Write \`ticket_price(age, is_student)\` that returns:
 - \`0\` if age < 5 (free)
@@ -358,16 +655,51 @@ except (NameError, TypeError) as e:
       topic: 'Strings',
       description: `## String Methods
 
-Python strings have many built-in methods for cleaning and transforming text.
+Python strings come with a built-in toolkit for **cleaning, searching, and transforming text**. Methods are called with dot notation: \`"my string".method()\`.
+
+### Cleaning and normalizing
 
 \`\`\`python
 s = "  Hello, World!  "
-s.strip()               # "Hello, World!"
-s.lower()               # "  hello, world!  "
-"hi mom".split()        # ["hi", "mom"]
-"cat".replace("c","b")  # "bat"
-"hello".startswith("he") # True
+s.strip()          # "Hello, World!"      — remove leading/trailing whitespace
+s.lower()          # "  hello, world!  "  — all lowercase
+s.upper()          # "  HELLO, WORLD!  "  — all uppercase
+s.title()          # "  Hello, World!  "  — capitalize each word
+s.strip().lower()  # chain methods together!
 \`\`\`
+
+### Searching
+
+\`\`\`python
+"hello".startswith("he")     # True
+"hello".endswith("lo")       # True
+"hello world".find("world")  # 6  — index of first match (-1 if not found)
+"hello".count("l")           # 2  — how many times "l" appears
+"lo" in "hello"              # True — fast membership test
+\`\`\`
+
+### Transforming
+
+\`\`\`python
+"cat".replace("c", "b")          # "bat"
+"hello world".replace(" ", "_")  # "hello_world"
+\`\`\`
+
+### Splitting and joining — the dynamic duo
+
+\`\`\`python
+# Split: string → list
+"a,b,c".split(",")         # ["a", "b", "c"]
+"hello world".split()      # ["hello", "world"] — splits on any whitespace
+
+# Join: list → string
+",".join(["a", "b", "c"])  # "a,b,c"
+" ".join(["hello", "world"])  # "hello world"
+\`\`\`
+
+✨ Strings are **immutable** — every method returns a *new* string. The original is never changed. You can chain methods freely because of this.
+
+⚠️ \`.split()\` with no argument strips extra whitespace and ignores empty parts. \`.split(" ")\` with an explicit space can give empty strings from multiple spaces.
 
 **Your task:**
 1. \`extract_initials(full_name)\` → \`"J.M.S."\` for \`"John Michael Smith"\`
@@ -417,17 +749,56 @@ except (NameError, TypeError) as e:
       topic: 'Data Structures',
       description: `## Tuples
 
-Tuples are **immutable** ordered sequences — perfect for grouping related values and returning multiple things from a function.
+A tuple is an **immutable ordered sequence** — like a list, but locked after creation. Use tuples for things that belong together and shouldn't change: coordinates, RGB colors, database rows.
 
 \`\`\`python
-point = (3, 4)        # create
-x, y = point          # unpack
-
-def divmod_custom(a, b):
-    return (a // b, a % b)   # return two values
-
-quotient, remainder = divmod_custom(17, 5)
+point      = (3, 4)       # an x, y coordinate
+rgb_red    = (255, 0, 0)  # a color
+dimensions = (1920, 1080) # width, height
 \`\`\`
+
+### Tuples vs Lists
+
+| Feature | Tuple \`()\` | List \`[]\` |
+|---------|------------|---------|
+| Ordered | ✅ | ✅ |
+| Indexed | ✅ | ✅ |
+| Mutable (changeable) | ❌ | ✅ |
+| Hashable (dict key / set member) | ✅ | ❌ |
+| Best for | Fixed groups of values | Collections you'll modify |
+
+### Unpacking — assign multiple variables at once
+
+\`\`\`python
+x, y = (3, 4)        # x = 3, y = 4
+a, b, c = (1, 2, 3)
+
+# Swap two variables with no temp variable!
+a, b = b, a
+\`\`\`
+
+### Returning multiple values from a function
+
+Python implicitly packs them into a tuple:
+
+\`\`\`python
+def minmax(numbers):
+    return min(numbers), max(numbers)   # Python creates (min, max) tuple
+
+low, high = minmax([3, 1, 9, 2, 7])    # unpack on the spot
+print(low, high)  # 1 9
+\`\`\`
+
+### You'll encounter tuples everywhere
+
+\`\`\`python
+quotient, remainder = divmod(17, 5)   # (3, 2)
+index, item = enumerate(["a"])[0]     # (0, "a") ... roughly
+\`\`\`
+
+✨ Tuples are the right choice when the number of items is fixed and their position has meaning (first = x, second = y).
+
+⚠️ A single-item tuple needs a trailing comma: \`(42,)\` not \`(42)\`. Without the comma, \`(42)\` is just the number 42 in parentheses.
 
 **Your task:**
 1. \`minmax(numbers)\` — returns \`(minimum, maximum)\` as a tuple
@@ -478,16 +849,58 @@ except (NameError, TypeError) as e:
       topic: 'Data Structures',
       description: `## Sets
 
-Sets store **unique, unordered** elements. They're fast for membership tests and set operations.
+A set stores **unique, unordered** elements — duplicates are silently removed. Sets shine at two things: membership testing (is this in the collection?) and set math (what do two groups have in common?).
+
+\`\`\`python
+fruits = {"apple", "banana", "cherry", "apple"}  # "apple" only stored once
+print(fruits)   # {'apple', 'banana', 'cherry'}  (order varies!)
+\`\`\`
+
+### Creating sets
+
+\`\`\`python
+primes = {2, 3, 5, 7, 11}       # from a literal
+
+nums = set([1, 2, 2, 3, 3, 3])  # from a list — deduplicates: {1, 2, 3}
+
+empty = set()   # MUST use set() for empty — {} creates an empty dict!
+\`\`\`
+
+### Set operations
 
 \`\`\`python
 a = {1, 2, 3, 4}
 b = {3, 4, 5, 6}
-a & b   # intersection: {3, 4}
-a | b   # union: {1, 2, 3, 4, 5, 6}
-a - b   # difference (in a, not in b): {1, 2}
-a ^ b   # symmetric difference: {1, 2, 5, 6}
+
+a & b   # intersection  — in BOTH a and b:      {3, 4}
+a | b   # union         — in EITHER a or b:      {1, 2, 3, 4, 5, 6}
+a - b   # difference    — in a but NOT b:        {1, 2}
+b - a   # difference    — in b but NOT a:        {5, 6}
+a ^ b   # symmetric diff — in one but not both:  {1, 2, 5, 6}
 \`\`\`
+
+### Membership testing — sets are very fast
+
+\`\`\`python
+"apple" in fruits    # True  — O(1), instant regardless of size
+"grape" in fruits    # False
+
+# Lists scan every element — much slower for large collections:
+"apple" in ["apple", "banana"]  # True, but O(n)
+\`\`\`
+
+### Useful set methods
+
+\`\`\`python
+fruits.add("mango")       # add one item
+fruits.discard("grape")   # remove if present (no error if missing)
+fruits.remove("grape")    # remove — raises KeyError if not found
+len(fruits)               # number of unique elements
+\`\`\`
+
+✨ Checking membership a lot? Convert your list to a set first: \`seen = set(my_list)\`.
+
+⚠️ Sets are **unordered** — you can't do \`my_set[0]\`. If you need a sorted view: \`sorted(my_set)\`.
 
 **Your task:**
 1. \`mutual_friends(friends_a, friends_b)\` — friends both users have in common
