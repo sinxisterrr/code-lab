@@ -1,14 +1,16 @@
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-ollama-key');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).end();
 
+  // User's own key from the browser, forwarded here so CORS isn't an issue
+  const apiKey = req.headers['x-ollama-key'];
+  if (!apiKey) return res.status(400).json({ error: 'No Ollama API key provided. Add it in Settings.' });
+
   const { model, messages } = req.body;
-  const apiKey = process.env.OLLAMA_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'OLLAMA_API_KEY not set in environment' });
 
   const upstream = await fetch('https://ollama.com/api/chat', {
     method: 'POST',

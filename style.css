@@ -139,6 +139,18 @@ nav {
 .challenge-item:hover { background: var(--surface2); }
 .challenge-item.active { background: var(--accent-dim); }
 
+.tier-header {
+  padding: 8px 12px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+.tier-beginner     { color: var(--green); }
+.tier-intermediate { color: var(--yellow); }
+.tier-advanced     { color: var(--red); }
+
 .ch-num {
   font-size: 11px;
   color: var(--text-muted);

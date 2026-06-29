@@ -125,10 +125,10 @@
     <h3>⚙ Settings</h3>
 
     <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
-      API keys are stored in your browser only — never sent anywhere except the AI provider you choose.
+      Your keys are stored in your browser only and forwarded directly to the provider you choose.
     </p>
 
-    <div style="margin-bottom:12px;">
+    <div style="margin-bottom:16px;">
       <label style="font-size:12px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px;">AI Instructor</label>
       <div class="provider-selector">
         <button class="provider-btn" data-provider="claude">Claude (Anthropic)</button>
@@ -136,15 +136,22 @@
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Anthropic API Key</label>
-      <input id="claude-key-input" type="password" placeholder="sk-ant-..." />
+    <div id="claude-settings">
+      <div class="form-group">
+        <label>Anthropic API Key</label>
+        <input id="claude-key-input" type="password" placeholder="sk-ant-..." />
+      </div>
     </div>
 
-    <div class="form-group">
-      <label>Ollama Model</label>
-      <input id="ollama-model-input" type="text" placeholder="gemma3:27b" />
-      <p style="font-size:11px;color:var(--text-muted);margin-top:5px;">API key is set via <code>OLLAMA_API_KEY</code> in Vercel environment variables.</p>
+    <div id="ollama-settings" style="display:none">
+      <div class="form-group">
+        <label>Ollama Cloud API Key</label>
+        <input id="ollama-key-input" type="password" placeholder="your ollama cloud key" />
+      </div>
+      <div class="form-group">
+        <label>Model</label>
+        <input id="ollama-model-input" type="text" placeholder="gemma3:27b" />
+      </div>
     </div>
 
     <div class="modal-actions">

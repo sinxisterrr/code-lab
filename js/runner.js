@@ -96,9 +96,10 @@ function expect(val, expected, msg) {
       compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.None, strict: false },
     });
 
-    const fn = new Function('console', compiled.outputText);
+    // Wrap in async IIFE so top-level await works in both user code and test code
+    const fn = new Function('console', `return (async function(){${compiled.outputText}})()`);
     const ret = fn(sandboxConsole);
-    if (ret && typeof ret.then === 'function') await ret;
+    await ret;
 
     return { success: true, output: logs.join('\n').trim() };
   } catch (err) {

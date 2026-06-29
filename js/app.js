@@ -49,19 +49,34 @@ function getCurrentChallenge() {
 function populateChallengeList() {
   const list = document.getElementById('challenge-list');
   list.innerHTML = '';
-  getChallenges().forEach((ch, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'challenge-item' + (i === currentChallengeIndex ? ' active' : '');
-    btn.innerHTML = `
-      <span class="ch-num">${String(i + 1).padStart(2, '0')}</span>
-      <span class="ch-info">
-        <span class="ch-title">${ch.title}</span>
-        <span class="ch-meta">${ch.topic} · ${ch.difficulty}</span>
-      </span>
-      <span class="ch-status">${getProgress(ch.id)}</span>
-    `;
-    btn.onclick = () => selectChallenge(i);
-    list.appendChild(btn);
+  const allChallenges = getChallenges();
+  const tiers = ['beginner', 'intermediate', 'advanced'];
+  const tierLabels = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' };
+
+  tiers.forEach(tier => {
+    const tierChallenges = allChallenges.filter(ch => ch.difficulty === tier);
+    if (!tierChallenges.length) return;
+
+    const header = document.createElement('div');
+    header.className = 'tier-header tier-' + tier;
+    header.textContent = tierLabels[tier];
+    list.appendChild(header);
+
+    tierChallenges.forEach(ch => {
+      const i = allChallenges.indexOf(ch);
+      const btn = document.createElement('button');
+      btn.className = 'challenge-item' + (i === currentChallengeIndex ? ' active' : '');
+      btn.innerHTML = `
+        <span class="ch-num">${String(i + 1).padStart(2, '0')}</span>
+        <span class="ch-info">
+          <span class="ch-title">${ch.title}</span>
+          <span class="ch-meta">${ch.topic}</span>
+        </span>
+        <span class="ch-status">${getProgress(ch.id)}</span>
+      `;
+      btn.onclick = () => selectChallenge(i);
+      list.appendChild(btn);
+    });
   });
 }
 
@@ -256,11 +271,13 @@ async function callAI(systemPrompt, history) {
     return data.content[0].text;
 
   } else if (provider === 'ollama') {
+    const apiKey = localStorage.getItem('ollama_api_key');
     const model = localStorage.getItem('ollama_model') || 'gemma3:27b';
+    if (!apiKey) throw new Error('No Ollama API key set — open Settings (⚙) to add one.');
 
     const res = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-ollama-key': apiKey },
       body: JSON.stringify({
         model,
         messages: [{ role: 'system', content: systemPrompt }, ...history],
@@ -306,13 +323,15 @@ function switchLanguage(lang) {
 // ── Settings ───────────────────────────────────────────────────────────────
 function loadSettings() {
   document.getElementById('claude-key-input').value = localStorage.getItem('claude_api_key') || '';
+  document.getElementById('ollama-key-input').value = localStorage.getItem('ollama_api_key') || '';
   document.getElementById('ollama-model-input').value = localStorage.getItem('ollama_model') || 'gemma3:27b';
-  const provider = localStorage.getItem('ai_provider') || 'claude';
-  document.querySelectorAll('.provider-btn').forEach(b => b.classList.toggle('active', b.dataset.provider === provider));
+  const provider = localStorage.getItem('ai_provider') || 'ollama';
+  setProvider(provider);
 }
 
 function saveSettings() {
   localStorage.setItem('claude_api_key', document.getElementById('claude-key-input').value.trim());
+  localStorage.setItem('ollama_api_key', document.getElementById('ollama-key-input').value.trim());
   localStorage.setItem('ollama_model', document.getElementById('ollama-model-input').value.trim() || 'gemma3:27b');
   closeModal('settings-modal');
 }
@@ -320,6 +339,8 @@ function saveSettings() {
 function setProvider(provider) {
   localStorage.setItem('ai_provider', provider);
   document.querySelectorAll('.provider-btn').forEach(b => b.classList.toggle('active', b.dataset.provider === provider));
+  document.getElementById('claude-settings').style.display = provider === 'claude' ? '' : 'none';
+  document.getElementById('ollama-settings').style.display = provider === 'ollama' ? '' : 'none';
 }
 
 // ── Modals ─────────────────────────────────────────────────────────────────
