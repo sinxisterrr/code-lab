@@ -142,18 +142,9 @@
     </div>
 
     <div class="form-group">
-      <label>Ollama Cloud API Key</label>
-      <input id="ollama-key-input" type="password" placeholder="ollama_..." />
-    </div>
-
-    <div class="form-group">
       <label>Ollama Model</label>
       <input id="ollama-model-input" type="text" placeholder="gemma3:27b" />
-    </div>
-
-    <div class="form-group">
-      <label>Ollama Proxy URL <span style="color:var(--text-muted);font-weight:400;text-transform:none">(run <code>node proxy.js</code> first)</span></label>
-      <input id="ollama-proxy-input" type="text" placeholder="http://localhost:3001" />
+      <p style="font-size:11px;color:var(--text-muted);margin-top:5px;">API key is set via <code>OLLAMA_API_KEY</code> in Vercel environment variables.</p>
     </div>
 
     <div class="modal-actions">

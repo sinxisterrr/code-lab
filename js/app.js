@@ -256,21 +256,14 @@ async function callAI(systemPrompt, history) {
     return data.content[0].text;
 
   } else if (provider === 'ollama') {
-    const apiKey = localStorage.getItem('ollama_api_key');
     const model = localStorage.getItem('ollama_model') || 'gemma3:27b';
-    const proxyUrl = (localStorage.getItem('ollama_proxy') || 'http://localhost:3001').replace(/\/$/, '');
-    if (!apiKey) throw new Error('No Ollama API key set — open Settings (⚙) to add one.');
 
-    const res = await fetch(`${proxyUrl}/api/chat`, {
+    const res = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model,
         messages: [{ role: 'system', content: systemPrompt }, ...history],
-        stream: false,
       }),
     });
     const data = await res.json();
@@ -313,18 +306,14 @@ function switchLanguage(lang) {
 // ── Settings ───────────────────────────────────────────────────────────────
 function loadSettings() {
   document.getElementById('claude-key-input').value = localStorage.getItem('claude_api_key') || '';
-  document.getElementById('ollama-key-input').value = localStorage.getItem('ollama_api_key') || '';
   document.getElementById('ollama-model-input').value = localStorage.getItem('ollama_model') || 'gemma3:27b';
-  document.getElementById('ollama-proxy-input').value = localStorage.getItem('ollama_proxy') || 'http://localhost:3001';
   const provider = localStorage.getItem('ai_provider') || 'claude';
   document.querySelectorAll('.provider-btn').forEach(b => b.classList.toggle('active', b.dataset.provider === provider));
 }
 
 function saveSettings() {
   localStorage.setItem('claude_api_key', document.getElementById('claude-key-input').value.trim());
-  localStorage.setItem('ollama_api_key', document.getElementById('ollama-key-input').value.trim());
   localStorage.setItem('ollama_model', document.getElementById('ollama-model-input').value.trim() || 'gemma3:27b');
-  localStorage.setItem('ollama_proxy', document.getElementById('ollama-proxy-input').value.trim() || 'http://localhost:3001');
   closeModal('settings-modal');
 }
 
