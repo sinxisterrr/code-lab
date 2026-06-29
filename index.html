@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>CodeLab</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Marked (markdown) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+  <!-- Pyodide (Python in browser) — loaded lazily in runner.js -->
+  <script>
+    function loadPyodide() {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js';
+        s.onload = async () => {
+          const py = await globalThis.loadPyodide();
+          resolve(py);
+        };
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+  </script>
+  <!-- Monaco loader -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+</head>
+<body>
+
+<!-- ── Nav ─────────────────────────────────────────────────────────────── -->
+<nav>
+  <button id="sidebar-toggle" class="icon-btn" title="Challenges">☰</button>
+  <div class="logo">⚡ CodeLab</div>
+
+  <div class="lang-switcher">
+    <button class="lang-btn" data-lang="python">Python</button>
+    <button class="lang-btn" data-lang="typescript">TypeScript</button>
+  </div>
+
+  <div class="nav-spacer"></div>
+
+  <button id="settings-btn" class="icon-btn" title="Settings">⚙</button>
+</nav>
+
+<!-- ── App Layout ───────────────────────────────────────────────────────── -->
+<div class="app-layout">
+
+  <!-- Sidebar: challenge list -->
+  <aside id="sidebar">
+    <div class="sidebar-header">Challenges</div>
+    <div id="challenge-list"></div>
+  </aside>
+
+  <!-- Main workspace -->
+  <div class="workspace">
+
+    <!-- Left: lesson + chat -->
+    <div class="panel-left">
+      <div class="lesson-header">
+        <h2 id="challenge-title">Loading...</h2>
+        <div class="badges">
+          <span id="difficulty-badge" class="badge">—</span>
+          <span id="topic-badge" class="badge">—</span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+        <div id="lesson-content"></div>
+      </div>
+
+      <div class="chat-section">
+        <div class="chat-header">
+          🤖 Ask your instructor
+        </div>
+        <div id="chat-messages"></div>
+        <div class="chat-input-row">
+          <textarea
+            id="chat-input"
+            rows="1"
+            placeholder="Ask anything... (Enter to send)"
+          ></textarea>
+          <button id="chat-send">↑</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: editor + terminal -->
+    <div class="panel-right">
+      <div class="editor-header">
+        <div class="file-tab">
+          <span class="dot">●</span>
+          <span id="file-label">solution.py</span>
+        </div>
+        <div class="editor-spacer"></div>
+        <span class="shortcut-hint">Ctrl+Enter to run</span>
+      </div>
+
+      <div id="editor"></div>
+
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          TERMINAL
+        </div>
+        <div id="terminal-output"></div>
+      </div>
+
+      <div class="action-bar">
+        <div class="nav-prev-next">
+          <button id="prev-btn">← Prev</button>
+          <button id="next-btn">Next →</button>
+        </div>
+        <div class="spacer"></div>
+        <button id="hint-btn" class="btn btn-ghost">💡 Hint</button>
+        <button id="run-btn" class="btn btn-run">▶ Run</button>
+        <button id="submit-btn" class="btn btn-submit">✓ Submit</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Settings Modal ───────────────────────────────────────────────────── -->
+<div id="settings-modal" class="modal-backdrop">
+  <div class="modal">
+    <h3>⚙ Settings</h3>
+
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+      API keys are stored in your browser only — never sent anywhere except the AI provider you choose.
+    </p>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px;">AI Instructor</label>
+      <div class="provider-selector">
+        <button class="provider-btn" data-provider="claude">Claude (Anthropic)</button>
+        <button class="provider-btn" data-provider="ollama">Ollama Cloud</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Anthropic API Key</label>
+      <input id="claude-key-input" type="password" placeholder="sk-ant-..." />
+    </div>
+
+    <div class="form-group">
+      <label>Ollama Cloud API Key</label>
+      <input id="ollama-key-input" type="password" placeholder="ollama_..." />
+    </div>
+
+    <div class="form-group">
+      <label>Ollama Model</label>
+      <input id="ollama-model-input" type="text" placeholder="gemma3:27b" />
+    </div>
+
+    <div class="form-group">
+      <label>Ollama Proxy URL <span style="color:var(--text-muted);font-weight:400;text-transform:none">(run <code>node proxy.js</code> first)</span></label>
+      <input id="ollama-proxy-input" type="text" placeholder="http://localhost:3001" />
+    </div>
+
+    <div class="modal-actions">
+      <button id="settings-cancel" class="btn btn-ghost">Cancel</button>
+      <button id="settings-save" class="btn btn-submit">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+<script src="js/challenges.js"></script>
+<script src="js/runner.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+  // Keep file tab label in sync with language
+  const origSwitch = window.switchLanguage;
+  // Patch after app.js loads
+  document.addEventListener('DOMContentLoaded', () => {
+    const updateFileLabel = () => {
+      const ext = currentLanguage === 'python' ? 'py' : 'ts';
+      document.getElementById('file-label').textContent = `solution.${ext}`;
+    };
+    updateFileLabel();
+
+    // Wrap switchLanguage to also update label
+    const _orig = window.switchLanguage;
+    window.switchLanguage = (lang) => { _orig(lang); updateFileLabel(); };
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.onclick = () => switchLanguage(b.dataset.lang);
+    });
+  });
+</script>
+
+</body>
+</html>
