@@ -146,7 +146,16 @@ nav {
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 8px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 6px;
+  transition: opacity .15s;
 }
+.tier-header:hover { opacity: 0.75; }
+.tier-toggle { font-size: 8px; opacity: 0.8; }
 .tier-beginner     { color: var(--green); }
 .tier-intermediate { color: var(--yellow); }
 .tier-advanced     { color: var(--red); }
@@ -245,6 +254,31 @@ nav {
 }
 #lesson-content ul, #lesson-content ol { padding-left: 20px; margin-bottom: 10px; color: var(--text-muted); }
 #lesson-content li { margin-bottom: 4px; }
+
+#lesson-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0 14px;
+  font-size: 12.5px;
+}
+#lesson-content th {
+  background: var(--surface2);
+  color: var(--text);
+  padding: 7px 12px;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid var(--border);
+}
+#lesson-content td {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  vertical-align: top;
+}
+#lesson-content tr:nth-child(even) td {
+  background: rgba(255,255,255,0.025);
+}
+#lesson-content td code, #lesson-content th code { font-size: 12px; }
 
 /* ── Chat ──────────────────────────────────────────────────────────────── */
 .chat-section {

@@ -5,6 +5,7 @@ let editor = null;
 let chatHistory = [];
 let hintIndex = 0;
 let currentTab = 'lesson';
+const collapsedTiers = {};
 
 // ── Init ───────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
@@ -58,10 +59,18 @@ function populateChallengeList() {
     const tierChallenges = allChallenges.filter(ch => ch.difficulty === tier);
     if (!tierChallenges.length) return;
 
+    const isCollapsed = !!collapsedTiers[tier];
+
     const header = document.createElement('div');
     header.className = 'tier-header tier-' + tier;
-    header.textContent = tierLabels[tier];
+    header.innerHTML = `<span class="tier-toggle">${isCollapsed ? '▶' : '▼'}</span>${tierLabels[tier]}`;
+    header.onclick = () => {
+      collapsedTiers[tier] = !collapsedTiers[tier];
+      populateChallengeList();
+    };
     list.appendChild(header);
+
+    if (isCollapsed) return;
 
     tierChallenges.forEach(ch => {
       const i = allChallenges.indexOf(ch);
