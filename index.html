@@ -39,6 +39,7 @@
 
   <div class="nav-spacer"></div>
 
+  <button id="dict-btn" class="icon-btn" title="Dictionary">📖</button>
   <button id="settings-btn" class="icon-btn" title="Settings">⚙</button>
 </nav>
 
@@ -61,6 +62,10 @@
         <div class="badges">
           <span id="difficulty-badge" class="badge">—</span>
           <span id="topic-badge" class="badge">—</span>
+        </div>
+        <div class="lesson-tabs">
+          <button class="tab-btn active" data-tab="lesson">Lesson</button>
+          <button class="tab-btn" data-tab="task">Task</button>
         </div>
       </div>
 
@@ -161,7 +166,22 @@
   </div>
 </div>
 
+<!-- ── Dictionary Panel ──────────────────────────────────────────────────── -->
+<div id="dict-panel" class="dict-panel">
+  <div class="dict-panel-header">
+    <span class="dict-panel-title">📖 Dictionary</span>
+    <button id="dict-close" class="icon-btn">✕</button>
+  </div>
+  <div class="dict-search-row">
+    <input id="dict-search" type="text" placeholder="Search terms..." autocomplete="off" />
+  </div>
+  <div id="dict-list" class="dict-list"></div>
+  <div id="dict-entry" class="dict-entry-view" style="display:none"></div>
+</div>
+<div id="dict-overlay" class="dict-overlay"></div>
+
 <!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+<script src="js/dictionary.js"></script>
 <script src="js/challenges.js"></script>
 <script src="js/runner.js"></script>
 <script src="js/app.js"></script>

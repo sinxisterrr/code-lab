@@ -4,6 +4,7 @@ let currentChallengeIndex = parseInt(localStorage.getItem(`${currentLanguage}_in
 let editor = null;
 let chatHistory = [];
 let hintIndex = 0;
+let currentTab = 'lesson';
 
 // ── Init ───────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
@@ -96,6 +97,7 @@ function selectChallenge(index) {
   localStorage.setItem(`${currentLanguage}_index`, index);
   hintIndex = 0;
   chatHistory = [];
+  currentTab = 'lesson';
   document.getElementById('chat-messages').innerHTML = '';
   clearTerminal();
   loadChallenge();
@@ -107,8 +109,9 @@ function loadChallenge() {
   const ch = getCurrentChallenge();
   if (!ch) return;
 
-  // Render description
-  document.getElementById('lesson-content').innerHTML = marked.parse(ch.description);
+  // Render lesson/task tab content
+  syncTabUI();
+  renderTab();
 
   // Load saved code or starter
   const saved = localStorage.getItem(`code_${ch.id}`);
@@ -312,7 +315,9 @@ function switchLanguage(lang) {
   localStorage.setItem('language', lang);
   hintIndex = 0;
   chatHistory = [];
+  currentTab = 'lesson';
   document.getElementById('chat-messages').innerHTML = '';
+  closeDict();
 
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
   populateChallengeList();
@@ -361,6 +366,212 @@ function showCelebration() {
   setTimeout(() => banner.remove(), 3000);
 }
 
+// ── Tab System ────────────────────────────────────────────────────────────
+function syncTabUI() {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === currentTab));
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  syncTabUI();
+  renderTab();
+}
+
+function renderTab() {
+  const ch = getCurrentChallenge();
+  if (!ch) return;
+  const marker = '**Your task:**';
+  const split = ch.description.indexOf(marker);
+  let md;
+  if (currentTab === 'task') {
+    md = split === -1 ? '*No specific task defined — explore freely!*' : ch.description.slice(split).trim();
+  } else {
+    md = split === -1 ? ch.description : ch.description.slice(0, split).trim();
+  }
+  const html = linkifyDictTerms(marked.parse(md));
+  document.getElementById('lesson-content').innerHTML = html;
+  document.querySelectorAll('#lesson-content .dict-link').forEach(el => {
+    el.onclick = () => openDictEntry(el.dataset.dictId);
+  });
+}
+
+function linkifyDictTerms(html) {
+  return html.replace(/<a href="dict:([^"]+)"[^>]*>([^<]+)<\/a>/g,
+    (_, id, text) => `<code class="dict-link" data-dict-id="${id}">${text}</code>`);
+}
+
+// ── Dictionary ─────────────────────────────────────────────────────────────
+function getDictionary() {
+  return (typeof DICTIONARY !== 'undefined' && DICTIONARY[currentLanguage]) || [];
+}
+
+function openDict() {
+  const panel = document.getElementById('dict-panel');
+  panel.classList.add('open');
+  document.getElementById('dict-overlay').classList.add('visible');
+  document.getElementById('dict-entry').style.display = 'none';
+  document.getElementById('dict-list').style.display = '';
+  document.getElementById('dict-search').value = '';
+  renderDictList('');
+  document.getElementById('dict-search').focus();
+}
+
+function closeDict() {
+  document.getElementById('dict-panel').classList.remove('open');
+  document.getElementById('dict-overlay').classList.remove('visible');
+}
+
+function openDictEntry(id) {
+  const entry = getDictionary().find(e => e.id === id);
+  if (!entry) return;
+  document.getElementById('dict-panel').classList.add('open');
+  document.getElementById('dict-overlay').classList.add('visible');
+  document.getElementById('dict-list').style.display = 'none';
+  document.getElementById('dict-entry').style.display = '';
+  renderDictEntry(entry);
+}
+
+function renderDictList(query) {
+  const q = query.toLowerCase();
+  const entries = getDictionary();
+  const filtered = q ? entries.filter(e =>
+    e.term.toLowerCase().includes(q) ||
+    (e.aliases || []).some(a => a.toLowerCase().includes(q)) ||
+    e.category.toLowerCase().includes(q)
+  ) : entries;
+
+  const list = document.getElementById('dict-list');
+  list.innerHTML = '';
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="dict-empty">No entries found.</div>';
+    return;
+  }
+
+  const byCategory = {};
+  filtered.forEach(e => {
+    (byCategory[e.category] = byCategory[e.category] || []).push(e);
+  });
+
+  Object.entries(byCategory).forEach(([cat, items]) => {
+    const header = document.createElement('div');
+    header.className = 'dict-cat-header';
+    header.textContent = cat;
+    list.appendChild(header);
+
+    items.forEach(entry => {
+      const row = document.createElement('div');
+      row.className = 'dict-list-row';
+      row.innerHTML = `
+        <span class="dict-list-emoji">${entry.emoji}</span>
+        <div class="dict-list-info">
+          <span class="dict-list-term">${entry.term}</span>
+          <span class="dict-list-summary">${entry.summary}</span>
+        </div>
+      `;
+      row.onclick = () => {
+        document.getElementById('dict-list').style.display = 'none';
+        document.getElementById('dict-entry').style.display = '';
+        renderDictEntry(entry);
+      };
+      list.appendChild(row);
+    });
+  });
+}
+
+function renderDictEntry(entry) {
+  const challenges = getChallenges();
+
+  const usedInHtml = (entry.usedIn && entry.usedIn.length) ? `
+    <div class="dict-section">
+      <div class="dict-section-label">Used in challenges</div>
+      <div class="dict-used-in">
+        ${entry.usedIn.map(id => {
+          const ch = challenges.find(c => c.id === id);
+          return ch ? `<span class="dict-challenge-link" data-id="${id}">${ch.title}</span>` : '';
+        }).filter(Boolean).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const tipsHtml = (entry.tips && entry.tips.length) ? `
+    <div class="dict-section">
+      <div class="dict-section-label">✨ Tips</div>
+      <ul class="dict-list-items">${entry.tips.map(t => `<li>${t}</li>`).join('')}</ul>
+    </div>
+  ` : '';
+
+  const gotchasHtml = (entry.gotchas && entry.gotchas.length) ? `
+    <div class="dict-section">
+      <div class="dict-section-label">⚠️ Gotchas</div>
+      <ul class="dict-list-items">${entry.gotchas.map(g => `<li>${g}</li>`).join('')}</ul>
+    </div>
+  ` : '';
+
+  const syntaxHtml = entry.syntax ? `
+    <div class="dict-section">
+      <div class="dict-section-label">Syntax</div>
+      <pre class="dict-syntax"><code>${escapeHtml(entry.syntax.trim())}</code></pre>
+    </div>
+  ` : '';
+
+  const examplesHtml = (entry.examples && entry.examples.length) ? `
+    <div class="dict-section">
+      <div class="dict-section-label">Examples</div>
+      <div class="dict-examples">
+        ${entry.examples.map(ex => `
+          <div class="dict-example">
+            <code class="dict-ex-code">${escapeHtml(ex.code)}</code>
+            ${ex.comment ? `<span class="dict-ex-comment">${ex.comment}</span>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const el = document.getElementById('dict-entry');
+  el.innerHTML = `
+    <div class="dict-entry-back">
+      <button class="dict-back-btn">← All Terms</button>
+    </div>
+    <div class="dict-entry-header">
+      <span class="dict-entry-emoji">${entry.emoji}</span>
+      <div>
+        <div class="dict-entry-term">${entry.term}</div>
+        <div class="dict-entry-category">${entry.category}</div>
+      </div>
+    </div>
+    <div class="dict-entry-summary">${entry.summary}</div>
+    ${entry.description ? `<div class="dict-entry-desc">${entry.description}</div>` : ''}
+    ${syntaxHtml}
+    ${examplesHtml}
+    ${tipsHtml}
+    ${gotchasHtml}
+    ${usedInHtml}
+  `;
+
+  el.querySelector('.dict-back-btn').onclick = () => {
+    el.style.display = 'none';
+    document.getElementById('dict-list').style.display = '';
+    renderDictList(document.getElementById('dict-search').value);
+  };
+
+  el.querySelectorAll('.dict-challenge-link').forEach(link => {
+    link.onclick = () => {
+      const idx = challenges.findIndex(c => c.id === link.dataset.id);
+      if (idx !== -1) { closeDict(); selectChallenge(idx); }
+    };
+  });
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 // ── Event Listeners ────────────────────────────────────────────────────────
 function setupEventListeners() {
   // Run & Submit
@@ -397,6 +608,17 @@ function setupEventListeners() {
     const challenges = getChallenges();
     if (currentChallengeIndex < challenges.length - 1) selectChallenge(currentChallengeIndex + 1);
   };
+
+  // Lesson/Task tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.onclick = () => switchTab(btn.dataset.tab);
+  });
+
+  // Dictionary
+  document.getElementById('dict-btn').onclick = openDict;
+  document.getElementById('dict-close').onclick = closeDict;
+  document.getElementById('dict-overlay').onclick = closeDict;
+  document.getElementById('dict-search').addEventListener('input', e => renderDictList(e.target.value));
 
   // Settings
   document.getElementById('settings-btn').onclick = () => { loadSettings(); openModal('settings-modal'); };
